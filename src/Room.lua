@@ -2,28 +2,26 @@ Room = Class{}
 
 
 
-function Room:init(type, id, isCriticalPath, entryPoint, prevRoomId)
-    self.size = 500;
-    self.OFFSET = self.size / 2;
+function Room:init(type, id, isCriticalPath)
+    self.size = 600;
+    self.offset = self.size / 2;
     self.id = id;
     self.type = type;
     self.adjacentRooms = {};
+    self.isCriticalPath = isCriticalPath;
     self.pos = {
-        x = SCREEN_CENTER_X - self.OFFSET,
-        y = SCREEN_CENTER_Y - self.OFFSET
+        x = SCREEN_CENTER_X - self.offset,
+        y = SCREEN_CENTER_Y - self.offset
     };
     
     self.dungeonColour = COLOURS.DUNGEON[self.type];
-
-    -- Add previous room to adjacent room map. Set Id to 0 if no prevRoomId provided
-    -- 0 returns to dungeon exit
-    self:addAdjacentRoom(entryPoint, prevRoomId, type);
 end
 
 
 
 function Room:addAdjacentRoom(direction, roomId, roomType)
-    local isLocked = roomType == RoomType.Obstacle
+    print(roomType, roomType == RoomType.Obstacle);
+    local isLocked = roomType == RoomType.Obstacle;
     local door = Door(direction, roomId, isLocked, self);
     self.adjacentRooms[direction] = door;
 end

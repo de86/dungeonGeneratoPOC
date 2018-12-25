@@ -9,7 +9,7 @@ function Door:init(position, leadsToRoomId, isLocked, parentRoom)
 
     self.size = self:getSize();
     self.pos = self:getPosition(parentRoom.pos, parentRoom.size);
-    self.status = self.isLocked and Doors.Open or Doors.Locked;
+    self.status = self.isLocked and Doors.Locked or Doors.Open;
 end
 
 
@@ -19,6 +19,7 @@ function Door:getPosition(roomPos, roomSize)
     local doorXOffset = (self.size.width / 2);
     local doorYOffset = (self.size.height / 2);
     
+    -- Shows working out. Makes it more readable for me.
     local northEdgeY = roomPos.y;
     local southEdgeY = roomPos.y + roomSize;
     local northEdgeYWithOffset = northEdgeY - doorYOffset;
@@ -39,9 +40,9 @@ function Door:getPosition(roomPos, roomSize)
     elseif self.position == Direction.South then
         return {x = roomCenterXOffset, y = southEdgeYWithOffset}
     elseif self.position == Direction.East then
-        return {x = eastEdgeXWithOffset, y = roomCenterYOffset}
-    elseif self.position == Direction.West then
         return {x = westEdgeXWithOffset, y = roomCenterYOffset}
+    elseif self.position == Direction.West then
+        return {x = eastEdgeXWithOffset, y = roomCenterYOffset}
     end
 end
 
@@ -60,7 +61,7 @@ end
 
 
 
-function Door:render(roomPosition, roomSize)    
+function Door:render()    
     love.graphics.setColor(COLOURS.DOORS[self.status]);
     love.graphics.rectangle(
         "fill",

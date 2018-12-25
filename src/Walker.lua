@@ -4,9 +4,10 @@ Walker = Class{};
 
 function Walker:init()
     self.currentRoomId = 0;
-    self.prevNodeId = 0;
+    self.prevRoomId = 0;
     self.currentRootNodeId = 0;
     self.currentObstacleNodeId = null;
+    self.prevRoomDirection = 0;
 
     self.roomCount = 0;
     self.map = {};
@@ -16,32 +17,39 @@ end
 
 function Walker:buildDungeon()
     local EXIT = -1;
-    local OBSTACLE_COUNT = 3
+    local OBSTACLE_COUNT = 3;
+    local IS_CRITICAL_PATH = true;
 
-    local entryRoomNode = self:createRoomNode(
-        RoomType.Entry,
-        IS_CRITICAL_PATH,
-        self:getRandomDirection(),
-        EXIT
-    );
+    local entryRoomNode = Room(RoomType.Entry, self.currentRoomId, IS_CRITICAL_PATH);
+    entryRoomNode:addAdjacentRoom(getRandomDirection(), EXIT, RoomType.Exit);
     self.map[entryRoomNode.id] = entryRoomNode;
 
-    self:generateDungeonLevels(3);
+    self:generateDungeonLevels(3, self.currentRoomId);
 
     return self.map;
 end
 
 
 
-function Walker:generateDungeonLevels(obstacle_count)
+function Walker:generateDungeonLevels(obstacle_count, rootRoomId)
+    self.currentRootNodeId = rootRoomId;
+    self.currentRoomId = rootRoomId;
+
     for i = 1, obstacle_count do
-        local direction = self:getRandomDirection();
+        self.nextRoomdirection = self:getAvailableRoomDirection(self.map[self.currentRoomId]);
+        self.prevRoomDirection = self:getEntryPointFromExitPoint(self.nextRoomdirection);
 
-        self.currentRootNodeId = self.currentRoomId;
+        local prevRoom = self.map[self.currentRoomId];
+        local NEXT_ROOM_TYPE = RoomType.Standard
+        local IS_CRITICAL_PATH = true;
+
         self:incrementRoomNode();
-        self:addAdjacentRoomNodeToRoomNode(self.prevNodeId, direction, self.currentRoomId, RoomType.Standard);
+        
+        prevRoom:addAdjacentRoom(self.nextRoomdirection, self.currentRoomId, NEXT_ROOM_TYPE);
 
-        local nextRoom = self:createRoomNode(RoomType.Standard, IS_CRITICAL_PATH, direction, self.prevNodeId);
+        local nextRoom = Room(RoomType.Standard, self.currentRoomId, IS_CRITICAL_PATH);
+        nextRoom:addAdjacentRoom(self.prevRoomDirection, prevRoom.id, prevRoom.type);
+
         self.map[nextRoom.id] = nextRoom;
 
         self:createPathToObstacle();
@@ -57,35 +65,23 @@ function Walker:createPathToObstacle()
     local isCreatingCriticalPath = true;
 
     while isCreatingCriticalPath do
-        self:incrementRoomNode();
+        self.nextRoomdirection = self:getAvailableRoomDirection(self.map[self.currentRoomId]);
+        self.prevRoomDirection = self:getEntryPointFromExitPoint(self.nextRoomdirection);
 
-        local direction = self:getRandomDirection();
-        local roomType = self:rollForRoomType(RoomType.Obstacle, 1 / 3);
-        local nextRoom = self:createRoomNode(roomType, IS_CRITICAL_PATH, direction, self.prevNodeId);
+        local prevRoom = self.map[self.currentRoomId];
+        local nextRoomType = self:rollForRoomType(RoomType.Obstacle, 1 / 3);
+
+        self:incrementRoomNode();
         
-        self:addAdjacentRoomNodeToRoomNode(self.prevNodeId, direction, self.currentRoomId, nextRoom.type);
+        prevRoom:addAdjacentRoom(self.nextRoomdirection, self.currentRoomId, nextRoomType);
+
+        local nextRoom = Room(nextRoomType, self.currentRoomId, IS_CRITICAL_PATH);
+        nextRoom:addAdjacentRoom(self.prevRoomDirection, prevRoom.id, prevRoom.type);
+
         self.map[nextRoom.id] = nextRoom;
 
-        isCreatingCriticalPath = not (roomType == RoomType.Obstacle);
+        isCreatingCriticalPath = not (nextRoomType == RoomType.Obstacle);
     end
-end
-
-
-
-function Walker:addAdjacentRoomNodeToRoomNode(roomNodeId, direction, roomNodeIdToAdd, nextRoomType)
-    self.map[roomNodeId]:addAdjacentRoom(direction, roomNodeIdToAdd, nextRoomType);
-end
-
-
-
-function Walker:createRoomNode(roomType, isCriticalPath, prevRoomExitPoint, prevRoomId)
-    return Room(
-        roomType,
-        self.roomCount,
-        isCriticalPath,
-        self:getEntryPointFromExitPoint(prevRoomExitPoint),
-        prevRoomId
-    );
 end
 
 
@@ -105,8 +101,24 @@ end
 
 
 
+function Walker:getAvailableRoomDirection(room)
+    local direction = self:getRandomDirection();
+
+    if room == nil then
+        return direction
+    end
+
+    while room.adjacentRooms[direction] ~= nil do
+        direction = self:getRandomDirection();
+    end
+
+    return direction;
+end
+
+
+
 function Walker:getRandomDirection()
-    return math.random(1, 4);
+    return math.random(1, 4)
 end
 
 
@@ -118,15 +130,8 @@ function Walker:rollForRoomType(roomType, chanceForTrue)
 end
 
 
-
-function Walker:jumpToRoomNode(node)
-    self.currentRoomId = roomNode;
-end
-
-
-
 function Walker:incrementRoomNode()
-    self.prevNodeId = self.currentRoomId;
+    self.prevRoomId = self.currentRoomId;
     self.roomCount = self.roomCount + 1;
     self.currentRoomId = self.roomCount;
 end

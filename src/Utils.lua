@@ -78,3 +78,9 @@ function getLoveColourFromRGBA(r, g, b, a)
         a
     }
 end
+
+
+
+function getRandomDirection()
+    return math.random(1, 4);
+end
