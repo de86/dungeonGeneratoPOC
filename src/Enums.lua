@@ -5,7 +5,9 @@ SpriteSheets = {
 States = {
     DungeonGen = 'dungeonGen',
     Start = 'startState',
-    Play = 'playState'
+    Play = 'playState',
+    ViewDungeon = 'viewDungeonState',
+    TweenRoomOutState = 'tweenRoomOutState'
 }
 
 Direction = {

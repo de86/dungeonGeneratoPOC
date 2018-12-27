@@ -21,9 +21,12 @@ require 'assets/exports';
 require 'src/states/DungeonGen';
 require 'src/states/PlayState';
 require 'src/states/StartState';
+require 'src/states/dungeon/ViewDungeonState';
+require 'src/states/dungeon/TweenRoomOutState';
 
 require 'src/Walker';
 require 'src/StateMachine';
+require 'src/StateStack';
 require 'src/Dungeon';
 require 'src/Room';
 require 'src/Door';
@@ -43,12 +46,8 @@ function love.load()
         GAME_CONFIG.PUSH_SETTINGS
     );
 
-    g_stateMachine = StateMachine({
-        [States.Start] = function() return StartState() end,
-        [States.Play] = function() return PlayState() end,
-        [States.DungeonGen] = function() return DungeonGen() end
-    })
-    g_stateMachine:change(States.DungeonGen);
+    g_stateStack = StateStack()
+    g_stateStack:push(ViewDungeonState());
 end
 
 
@@ -64,7 +63,7 @@ function love.update(dt)
         love.event.quit();
     end
 
-    g_stateMachine:update(dt);
+    g_stateStack:update(dt);
 
     love.keyboard.flushKeysPressedCache();
 end
@@ -74,7 +73,7 @@ end
 function love.draw()
     push:start();
 
-    g_stateMachine:render();
+    g_stateStack:render();
 
     push:finish();
 end

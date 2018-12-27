@@ -28,12 +28,12 @@ end
 
 
 
-function Room:renderBase()
+function Room:renderBase(renderPos)
     love.graphics.setColor(self.dungeonColour);
     love.graphics.rectangle(
         "fill",
-        self.pos.x,
-        self.pos.y,
+        renderPos.x,
+        renderPos.y,
         self.size,
         self.size,
         30,
@@ -44,14 +44,22 @@ end
 
 
 
-function Room:renderDoors()
+function Room:renderDoors(renderPos)
     for position, door in pairs(self.adjacentRooms) do
-        door:render(self.pos, self.size);
+        door:render(renderPos, self.size);
     end
 end
 
 
-function Room:render(dungeonMap)
-    self:renderBase();
-    self:renderDoors();
+function Room:render(renderOffsetX, renderOffsetY)
+    renderOffsetX = renderOffsetX ~= nil and renderOffsetX or 0;
+    renderOffsetY = renderOffsetY ~= nil and renderOffsetY or 0;
+
+    local renderPos = {
+        x = self.pos.x + renderOffsetX,
+        y = self.pos.y + renderOffsetY
+    }
+
+    self:renderBase(renderPos);
+    self:renderDoors({x = renderOffsetX, y = renderOffsetY});
 end

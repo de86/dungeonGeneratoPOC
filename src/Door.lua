@@ -61,12 +61,12 @@ end
 
 
 
-function Door:render()    
+function Door:render(renderOffset)
     love.graphics.setColor(COLOURS.DOORS[self.status]);
     love.graphics.rectangle(
         "fill",
-        self.pos.x,
-        self.pos.y,
+        self.pos.x + renderOffset.x,
+        self.pos.y + renderOffset.y,
         self.size.width,
         self.size.height
     );

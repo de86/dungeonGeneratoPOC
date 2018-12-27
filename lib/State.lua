@@ -4,10 +4,16 @@
     defining empty functions for the required methods
 ]]--
 
-State = Class{};
+State = Class{
+    shouldRender;
+    shouldUpdate;
+};
 
 function State:init() end
 function State:enter() end
 function State:exit() end
+function State:pause() end
+function State:sleep() end
+function State:resume() end
 function State:update() end
 function State:render() end
