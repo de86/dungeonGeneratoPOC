@@ -1,9 +1,8 @@
 --[[
-    GD50
-    Pokemon
+    State Stack taken from GD50 course on edx
 
     Author: Colton Ogden
-    cogden@cs50.harvard.edu
+    Modified by: Dave Elliott
 ]]
 
 StateStack = Class{}
